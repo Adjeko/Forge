@@ -37,18 +37,20 @@ Mehrere primitive Kommandos werden zu einem Ablauf (Workflow) verkettet und einm
 
 ---
 
-### User Story 3 - Status-LEDs & Fortschrittsleiste (Priority: P3)
+### User Story 3 - Hintergrund Status-Monitore mit LEDs (Priority: P3)
 
-Während der Ausführung visualisiert rechter Bereich Schrittzustände mittels LEDs; Footer zeigt zweizeiligen Fortschrittsbalken (Name + Gradient).
+Unabhängig von laufenden Workflows zeigt der rechte Bereich mehrere Status-LEDs, die periodisch externe oder interne Bedingungen prüfen (z.B. Ping einer IP). Jede LED aktualisiert sich im Hintergrund: Grün bei Erfolg (ziel erreichbar), Rot bei Fehler, Spinner / animiert bei laufender Prüfung.
 
-**Why this priority**: Erhöht Transparenz & reduziert kognitive Last.
+**Why this priority**: Liefert kontinuierlichen situativen Kontext (z.B. Netzwerk-/Umgebungszustand) ohne die Workflow-Ausführung zu blockieren.
 
-**Independent Test**: 4-Schritt-Ablauf starten, während Lauf LED-Zustände & Fortschritt beobachten.
+**Independent Test**: LED-Konfiguration mit Ping-Monitor zu lokaler/erreichbarer IP und zu einer absichtlich nicht erreichbaren IP; Änderungen (z.B. Steckdose Netzwerk trennen) schlagen sich innerhalb des Polling-Intervalls nieder.
 
 **Acceptance Scenarios**:
 
-1. **Given** Ablauf läuft, **When** Schritt 2 aktiv, **Then** LED Schritt 2 aktiv, vorherige erfolgreich, folgende neutral.
-2. **Given** Fehler tritt auf, **When** Schritt fehlschlägt, **Then** LED des Schritts rot, Fortschrittsbalken zeigt Endstatus (Failure) an.
+1. **Given** LED konfiguriert mit Ping auf erreichbare IP, **When** System startet, **Then** innerhalb eines Polling-Intervalls (≤5s) LED Status = Grün.
+2. **Given** LED konfiguriert mit Ping auf nicht erreichbare IP, **When** System startet, **Then** innerhalb ≤5s LED Status = Rot nach kurzem Spinner.
+3. **Given** erreichbare IP wird während Betrieb nicht erreichbar, **When** nächste Prüfung erfolgt, **Then** LED wechselt von Grün zu Rot innerhalb des nächsten Intervalls.
+4. **Given** IP wird wieder erreichbar, **When** Prüfung erfolgreich, **Then** LED kehrt zu Grün zurück.
 
 ---
 
@@ -86,7 +88,7 @@ Automatische, konsistente Farbzuteilung je Schritt; Fehlerausgaben immer rot.
 - **FR-004**: System MUST execute primitive Kommandos sequenziell innerhalb eines Ablaufs und nacheinander deren Ausgaben anzeigen.
 - **FR-005**: System MUST color-code jede Schritt-Ausgabe mit einer zugewiesenen Farbe; Fehlerschritte überschreiben mit Rot.
 - **FR-006**: System MUST stop remaining steps of a workflow after first failing step unless user configured continuation (Konfiguration zukünftiges Feature; aktuell: immer stoppen).
-- **FR-007**: System MUST show Status-LEDs rechts mit Zuständen: Pending, Running, Success, Failed für jeden definierten Schritt eines gestarteten Ablaufs.
+- **FR-007**: System MUST show independent background status monitors (LEDs) on the right, each with states: Checking (Spinner), OK (Green), Failed (Red), Disabled (Grey).
 - **FR-008**: System MUST show im Footer einen zweizeiligen Fortschrittsbereich: (Zeile 1) Ablaufname, (Zeile 2) fortschreitender Balken (Gradient gefüllt proportional erledigten Schritten).
 - **FR-009**: System MUST validate before start: Kein Ablaufstart wenn 0 Schritte; Fehlermeldung sichtbar ohne Absturz.
 - **FR-010**: System MUST handle large output streaming without freezing UI (pufferisierte Anzeige, mindestens letzte 5000 Zeilen sichtbar). [Assumption]
@@ -94,16 +96,20 @@ Automatische, konsistente Farbzuteilung je Schritt; Fehlerausgaben immer rot.
 - **FR-012**: System MUST assign deterministic colors to steps from predefined palette (z.B. Gelb, Blau, Grün, Magenta, Cyan, Weiß… Rot reserviert für Fehler).
 - **FR-013**: System SHOULD degrade gracefully on narrow window widths (unter Mindestbreite: Status-LED Bereich reduziert oder umschaltbar). [NEEDS CLARIFICATION: Schwellenwert für Layout-Umschaltung]
 - **FR-014**: System MUST ensure that header and footer remain fixed while middle content scrolls.
-- **FR-015**: System MUST record exit status per Schritt für LED-Zustand.
+- **FR-015**: System MUST record exit status per Schritt für LED-Zustand (workflow) AND maintain separate state per background status monitor.
 - **FR-016**: System MUST prevent execution of empty or whitespace-only commands (Validierungsfehler anzeigen).
 - **FR-017**: System MUST indicate hanging step status after 60 seconds of no output.
+- **FR-018**: System MUST poll each status monitor at a configurable (initial default 5s) interval without blocking workflow execution.
+- **FR-019**: System MUST allow each status monitor to define a human-readable label and a type (e.g. Ping, Custom Script) with associated evaluation logic.
+- **FR-020**: System SHOULD batch schedule monitor checks to avoid synchronized spikes (jitter ≤ 500ms randomization optional).
 
 ### Key Entities
 
 - **Primitive Command**: Ein vordefiniertes ausführbares CLI-Kommando (Name, Anzeige-Label, zugewiesene Farbe, letzter Exit-Code).
 - **Workflow (Ablauf)**: Sequenz von Primitive Commands (Name, Schritt-Liste, Status: Pending/Running/Success/Failed, Start-/Endzeit, Fehler-Schritt-ID falls abgebrochen).
 - **Execution Step**: Laufzeitinstanz eines Primitive Command innerhalb eines Workflows (Referenz auf Kommando, Start-/Endzeit, Exit-Code, Output-Puffer, Farbe, Status).
-- **Status LED**: Visuelle Abstraktion eines Execution Step Zustands (Symbol + Farbe pro Zustand).
+- **Status Monitor**: Hintergrund-Prüfung (ID, Label, Typ, Ziel/Parameter, letzter Prüfzeitpunkt, Intervall, Status: Checking/OK/Failed/Disabled, letzte Fehlermeldung optional).
+- **Status LED**: Visuelle Abstraktion eines Monitor-Zustands (Symbol + Farbe) unabhängig von Workflow-Schritten.
 - **Progress Bar**: Darstellung des prozentualen Fortschritts (# erledigte Schritte / Gesamt). Enthält Titel (Workflow-Name) und Gradient-Füllung.
 
 ## Success Criteria *(mandatory)*
@@ -116,12 +122,17 @@ Automatische, konsistente Farbzuteilung je Schritt; Fehlerausgaben immer rot.
 - **SC-004**: Fortschrittsanzeige aktualisiert ≤250 ms nach Schrittabschluss; erreicht 100% bei Ende.
 - **SC-005**: 100% Testpersonen erkennen Status jedes Schritts korrekt (Testlauf mit 5 Personen).
 - **SC-006**: Layout ≥100 Zeichen ohne Überlappung; <100 Zeichen: definierte Degradierung ohne Verlust kritischer Statusinfos.
+ - **SC-007**: Status-Monitor LED reflektiert Zustandswechsel (OK↔Failed) innerhalb ≤1.2 × Default-Polling (≤6s bei 5s Intervall).
+ - **SC-008**: ≥99% korrekte Klassifikation erfolgreicher Ping-Prüfungen über 5 Minuten Test; Fehlklassifikation <1%.
+ - **SC-009**: Parallel laufende Monitor-Polls erhöhen gemessene Eingabe-Reaktionszeit nicht über 200 ms Schwelle (manueller Test während gleichzeitigem Workflow + 3 Monitore).
 
 ### Assumptions
 
 - Unlimitierter Output-Puffer (Bewusste Entscheidung; Performance überwachen).
 - Timeout hängender Schritt: 60s fix im MVP.
 - Mindestbreite für Zweispalten: 100 Zeichen.
+- Status-Monitor Default-Polling-Intervall 5s; zukünftige Konfiguration möglich.
+- Optionaler Start-Jitter bis 500 ms verteilt Poll-Last (empfohlen, nicht zwingend für MVP-Abnahme).
 - Einzelner Entwickler als Benutzerrolle.
 - Fail-Fast vereinfacht Fehlerdiagnose.
 - Feste Farbpalette im MVP (keine Konfiguration).
