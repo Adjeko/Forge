@@ -1,50 +1,74 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+Version change: 1.1.1 → 1.2.0 (MINOR)
+Modified principles:
+	II. Charm Ecosystem Compliance → Expanded with composition-first mandate
+Added sections: None
+Removed sections: None
+Templates requiring updates:
+	✅ .specify/templates/plan-template.md (added composition-first gate)
+	✅ .specify/templates/tasks-template.md (added guidance for composing UI components)
+	⚠ README.md (add note about composition-first rule for contributors)
+Follow-up TODOs: None
+-->
+
+# Forge Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Terminal-First UI
+Forge MUST deliver all user-facing functionality via a TUI, prioritizing clarity, accessibility, and responsiveness in the terminal. All components MUST be interactive and visually consistent.
+Rationale: Ensures the app remains focused on its core value as a TUI and leverages the strengths of terminal-based workflows.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Charm Ecosystem Compliance & Composition-First
+All visual and interactive components MUST use Charm libraries (Bubbletea, Bubble, Lipgloss, Huh, BubbleZone) for rendering, styling, and interactivity. Before implementing any "new" UI component, you MUST attempt to compose it from existing Charm primitives and reusable Bubbles (composition-first rule). Only if the desired behavior cannot be achieved through composition MAY a bespoke implementation be created.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+Mandatory order of approach:
+1. Reuse an existing Forge component as-is (prefer).
+2. Compose from existing Charm primitives (e.g., Bubbletea model + Modal + Label + Button + Lipgloss styles).
+3. Extend/wrap an existing Bubble non-invasively.
+4. Create a new custom component (last resort) WITH written justification in the PR describing: gap, attempted compositions, why insufficient. If broadly useful, open/track an upstream issue in the Charm ecosystem.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+Example: No ready-made confirmation dialog? Compose one from Modal + Label + Button(s) instead of writing a new dialog renderer. (Beispiel in Deutsch: Wenn es keinen Bestätigungs-Dialog gibt, baue ihn aus Modal, Label und Button zusammen, bevor du eine eigene Implementierung schreibst.)
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+Prohibited without justification: Direct low-level terminal drawing logic bypassing Charm abstractions.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+Rationale: Guarantees a unified look/feel, minimizes maintenance surface, accelerates development, and encourages upstream contribution rather than local divergence.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. Test-Driven Development (NON-NEGOTIABLE)
+All new features and bug fixes MUST be developed using TDD. Tests MUST be written before implementation, fail initially, and pass only after code is complete. Red-Green-Refactor cycle is strictly enforced.
+Rationale: Ensures reliability, maintainability, and user trust in every release.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### IV. Integration & Contract Testing
+Integration tests MUST cover all interactions between Bubbletea models, BubbleZone click events, and external Go packages. Contract changes require new/updated tests.
+Rationale: Prevents regressions and ensures seamless user experience across all interactive flows.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### V. Observability & Simplicity
+Forge MUST provide structured logging for all major actions and errors. Simplicity is enforced: avoid unnecessary features, keep UI minimal, and follow YAGNI (You Aren't Gonna Need It) principles.
+Rationale: Improves debuggability and keeps the app maintainable and user-friendly.
+
+## Technology Stack & Constraints
+Forge is written in Go. All TUI components MUST use Charm libraries (Bubbletea, Bubble, Lipgloss, Huh, BubbleZone). No other UI libraries are permitted unless explicitly justified and documented. All dependencies MUST be open source and actively maintained.
+
+## Development Workflow & Quality Gates
+All code changes MUST pass automated tests and code review. Every PR MUST demonstrate compliance with TDD and integration testing principles. Releases are versioned using semantic versioning (MAJOR.MINOR.PATCH). Breaking changes require a migration plan and explicit user communication.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all other development practices. Amendments require documentation and a migration plan for affected features. As the sole developer, you are responsible for verifying compliance with all principles before making changes. Complexity must be justified in writing. Runtime guidance is maintained in the README.md and updated with every constitution change.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+<!--
+Sync Impact Report
+Version change: 1.0.0 → 1.1.0
+Modified principles: All principles rewritten for Forge context
+Added sections: Technology Stack & Constraints, Development Workflow & Quality Gates
+Removed sections: None
+Templates requiring updates:
+✅ plan-template.md (Constitution Check gates updated)
+✅ spec-template.md (requirements and testing alignment)
+✅ tasks-template.md (task types and test-first discipline)
+⚠ README.md (ensure runtime guidance matches principles)
+Follow-up TODOs:
+TODO(RATIFICATION_DATE): Set original ratification date if known
+-->
+**Version**: 1.2.0 | **Ratified**: 2025-10-10 | **Last Amended**: 2025-10-10

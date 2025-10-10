@@ -33,6 +33,13 @@
 
 [Gates determined based on constitution file]
 
+- Terminal-first: All user-visible functionality deliverable via TUI.
+- Charm compliance: ONLY Charm ecosystem libs for UI. No alternatives without justification.
+- Composition-first: Any new UI element must first attempt reuse or composition (existing component → compose from primitives → wrap → custom last). PR must document justification if reaching custom.
+- TDD: Tests defined before implementation (unit, integration/contract as applicable).
+- Observability: Logging for major actions/errors planned.
+- Simplicity: Explicitly list intentionally deferred features to avoid scope creep.
+
 ## Project Structure
 
 ### Documentation (this feature)

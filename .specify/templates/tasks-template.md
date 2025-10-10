@@ -11,6 +11,8 @@ description: "Task list template for feature implementation"
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
+> UI Components: Follow COMPOSITION-FIRST rule (reuse → compose → wrap → custom last). Any custom Bubbletea component tasks MUST include a preceding task that documents attempted compositions.
+
 ## Format: `[ID] [P?] [Story] Description`
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
