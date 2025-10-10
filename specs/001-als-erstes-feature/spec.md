@@ -77,6 +77,7 @@ Automatische, konsistente Farbzuteilung je Schritt; Fehlerausgaben immer rot.
 - Schritt ohne neue Ausgabe > 60s → Status „hängend“ angezeigt.
 - Farbpalette erschöpft → Wiederverwendung erlaubt; Schrittindex + LED sichern Unterscheidbarkeit.
 - Fensterbreite < 100 Zeichen → Degradiertes Layout (minimaler LED-Bereich oder Toggle), Fokus auf Output.
+ - Nicht-Whitelist Kommando eingegeben → Sofort ablehnen, Fehlermeldung anzeigen, kein Ausführungsprozess gestartet.
 
 ## Requirements *(mandatory)*
 
@@ -84,7 +85,7 @@ Automatische, konsistente Farbzuteilung je Schritt; Fehlerausgaben immer rot.
 
 - **FR-001**: System MUST render eine Vollbild-TUI mit Header (4 Zeilen: obere Info + 3-Zeilen ASCII Forge-Schriftzug) und Footer (Progress-Bereich) sowie Mittelteil zweigeteilt (links 2/3 Output, rechts 1/3 Status-LEDs).
 - **FR-002**: System MUST display den Farbverlauf (#B50013 → #CCCCCC) für das Wort "Forge" im Header und für aktive Fortschrittsbalken.
-- **FR-003**: System MUST allow Auswahl & Ausführung eines einzelnen primitiven Kommandos (hartcodierte Liste initial enthält mindestens "git status", "git fetch", "git log -1").
+- **FR-003**: System MUST allow Auswahl & Ausführung eines einzelnen primitiven Kommandos ausschließlich aus einer kuratierten Whitelist (initial mindestens "git status", "git fetch", "git log -1"; keine freie Shell-Eingabe im MVP).
 - **FR-004**: System MUST execute primitive Kommandos sequenziell innerhalb eines Ablaufs und nacheinander deren Ausgaben anzeigen.
 - **FR-005**: System MUST color-code jede Schritt-Ausgabe mit einer zugewiesenen Farbe; Fehlerschritte überschreiben mit Rot.
 - **FR-006**: System MUST stop remaining steps of a workflow after first failing step unless user configured continuation (Konfiguration zukünftiges Feature; aktuell: immer stoppen).
@@ -102,6 +103,7 @@ Automatische, konsistente Farbzuteilung je Schritt; Fehlerausgaben immer rot.
 - **FR-018**: System MUST poll each status monitor at a configurable (initial default 5s) interval without blocking workflow execution.
 - **FR-019**: System MUST allow each status monitor to define a human-readable label and a type (e.g. Ping, Custom Script) with associated evaluation logic.
 - **FR-020**: System SHOULD batch schedule monitor checks to avoid synchronized spikes (jitter ≤ 500ms randomization optional).
+- **FR-021**: System MUST reject any attempted execution of a non-whitelisted command with a clear user-facing error message (ohne Ausführungsversuch).
 
 ### Key Entities
 
@@ -136,6 +138,7 @@ Automatische, konsistente Farbzuteilung je Schritt; Fehlerausgaben immer rot.
 - Einzelner Entwickler als Benutzerrolle.
 - Fail-Fast vereinfacht Fehlerdiagnose.
 - Feste Farbpalette im MVP (keine Konfiguration).
+ - Whitelist-Only Kommandoeingabe (Option A) – verhindert Ausführung beliebiger Shell-Befehle; verringert Sicherheits- & Stabilitätsrisiko.
 
 ## Clarifications
 
@@ -144,3 +147,4 @@ Automatische, konsistente Farbzuteilung je Schritt; Fehlerausgaben immer rot.
 - Q: Maximale Puffertiefe für Ausgabe? → A: Unbegrenzt (kein Limit)
 - Q: Timeout-Länge für hängende Schritte? → A: 60 Sekunden
 - Q: Mindestbreite für zweispaltiges Layout? → A: 100 Zeichen
+ - Q: Umfang der Kommando-Ausführung? → A: Nur kuratierte Primitive (Whitelist)
