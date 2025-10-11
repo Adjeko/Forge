@@ -34,6 +34,14 @@ Purpose: Core abstractions all stories depend on.
 - [ ] T013 Implement gradient header & static footer layout skeleton in `src/ui/components/chrome.go`
 - [ ] T014 Add BubbleZone registration helper utilities in `src/ui/zones/zones.go`
 - [ ] T015 Wire main loop `main.go` minimal run (quit on 'q')
+### Composition Attempt Documentation (Moved Earlier per Constitution)
+// Each new UI component requires a composition attempt doc BEFORE non-trivial custom code.
+- [ ] T086A [P] Create composition attempt template (`docs/composition/attempt-template.md`) with fields: Component, Intended Behavior, Attempted Charm Primitives, Gaps, Decision Rationale.
+- [ ] T086B [P] Add composition attempt doc for CommandList component.
+- [ ] T086C [P] Add composition attempt doc for OutputViewport component.
+- [ ] T086D [P] Add composition attempt doc for ProgressBar component.
+- [ ] T086E [P] Add composition attempt doc for MonitorsPanel component.
+- [ ] T086F [P] Add composition attempt doc for HelpOverlay component.
 
 Checkpoint: App launches with header & footer, quits via 'q'; no command execution yet.
 
@@ -46,6 +54,7 @@ Checkpoint: App launches with header & footer, quits via 'q'; no command executi
 - [ ] T073 [P] Foundational Test: Advisory threshold warning trigger at 100k lines (Assumption)
 - [ ] T074 [P] Foundational Test: Composition-first UI assembly smoke (constitution)
 - [ ] T075 [P] Foundational Test: Accessibility parity snapshot (hotkey vs zone) (Principle VI)
+- [ ] T086G [P] Meta-test: Verify composition attempt docs exist for all declared components (CommandList, OutputViewport, ProgressBar, MonitorsPanel, HelpOverlay) BEFORE their implementation tasks run.
 
 ---
 ## Phase 3: User Story 1 - Einzelnes primitives Kommando ausführen (P1) 🎯 MVP
@@ -182,7 +191,7 @@ Checkpoint: Logs provide traceability for major actions.
 - [ ] T060 [P] Add advisory warning when output lines exceed threshold (e.g., 100k) in buffer
 - [ ] T061 [P] Final interaction audit (parity/help/focus resize stress) consolidating previous parity/help/focus tasks (references T045, T046, T047, T077)
 - [ ] T064 Performance profiling (measure input latency under load) & adjustments (post T089) 
-- [ ] T086 [P] Composition Attempt Documentation (create `docs/composition/` and add templates; validate stubs for components)
+// T086 moved earlier as T086A–T086G (Foundational phase) to satisfy Composition-First gate.
 - [ ] T087 Usability heuristic / SC-005 evaluation doc (record method or convert to assumption with justification)
 - [ ] T065 Security review: whitelist enforcement & no shell injection possibility
 - [ ] T066 Documentation updates in `quickstart.md` (add workflow + overlay instructions)

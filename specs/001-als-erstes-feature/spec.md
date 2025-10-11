@@ -89,12 +89,12 @@ Automatische, konsistente Farbzuteilung je Schritt; Fehlerausgaben immer rot.
 - **FR-004**: System MUST execute primitive Kommandos sequenziell innerhalb eines Ablaufs und nacheinander deren Ausgaben anzeigen.
 - **FR-005**: System MUST color-code jede Schritt-Ausgabe mit einer zugewiesenen Farbe; Fehlerschritte überschreiben mit Rot.
 - **FR-006**: System MUST stop remaining steps of a workflow after first failing step unless user configured continuation (Konfiguration zukünftiges Feature; aktuell: immer stoppen).
-- **FR-007**: System MUST show independent background status monitors (LEDs) on the right, each with states: Checking (Spinner), OK (Green), Failed (Red), Disabled (Grey).
-- **FR-008**: System MUST show im Footer einen zweizeiligen Fortschrittsbereich: (Zeile 1) Ablaufname, (Zeile 2) fortschreitender Balken (Gradient gefüllt proportional erledigten Schritten).
-- **FR-009**: System MUST validate before start: Kein Ablaufstart wenn 0 Schritte; Fehlermeldung sichtbar ohne Absturz.
-- **FR-010a**: System MUST guarantee dass mindestens die letzten 5000 Zeilen des Output-Puffers durch Scroll-Aktionen erreichbar bleiben (Viewport-Retention) ohne Verlust älterer Zeilen (kein explizites Scrollbar-Widget erforderlich).
-- **FR-010b**: System MUST maintain ≤200 ms Eingabe-Reaktionszeit während kontinuierlichem Streaming von ≥50k Zeilen (Performance-Anforderung – korreliert mit SC-002). [Assumption]
-- **FR-011**: System MUST indicate completion state im Footer nach Ende mittels Label `[SUCCESS]` (grün) oder `[FAILED]` (rot) vor dem Fortschrittsbalken.
+ **FR-007**: System MUST show independent background status monitors (LEDs) on the right, each with states: Checking (Spinner), OK (Green), Failed (Red), Disabled (Grey).
+ **FR-008**: System MUST show im Footer einen zweizeiligen Fortschrittsbereich: (Zeile 1) Ablaufname, (Zeile 2) fortschreitender Balken (Gradient gefüllt proportional erledigten Schritten).
+ **FR-009**: System MUST validate before start: Kein Ablaufstart wenn 0 Schritte; Fehlermeldung sichtbar ohne Absturz.
+ **FR-010a**: System MUST guarantee dass mindestens die letzten 5000 Zeilen des Output-Puffers durch Scroll-Aktionen erreichbar bleiben (Viewport-Retention) ohne Verlust älterer Zeilen (kein explizites Scrollbar-Widget erforderlich).
+ **FR-010b**: System MUST maintain ≤200 ms Eingabe-Reaktionszeit während kontinuierlichem Streaming von ≥50k Zeilen (Performance-Anforderung – korreliert mit SC-002). Messdefinition: Zeit zwischen gültigem Hotkey-Tastendruck (z.B. Scroll PgDn, Fokuswechsel Tab) und vollständiger UI-Aktualisierung (sichtbarer neuer Scroll-Offset oder Fokusstil) unter gleichzeitiger Ausgabe-Last (≥50k Zeilen Stream). Messung: ≥200 Stichproben über synthetischen Lastlauf; P95 MUSS ≤200 ms sein; Mittelwert SOLL ≤170 ms sein. (Normative Performance Requirement.)
+ **FR-011**: System MUST indicate completion state im Footer nach Ende mittels Label `[SUCCESS]` (grün) oder `[FAILED]` (rot) vor dem Fortschrittsbalken.
 - **FR-012**: System MUST assign deterministic colors to steps from predefined palette (z.B. Gelb, Blau, Grün, Magenta, Cyan, Weiß… Rot reserviert für Fehler).
 - **FR-013**: System SHOULD degrade gracefully when window width <100 Zeichen: Monitor Panel wird auf eine einzelne komprimierte Zeile mit aggregiertem Status (z.B. OK:2 Failed:1) reduziert oder via Toggle ausgeblendet; Fokus-Reihenfolge bleibt erhalten.
 - **FR-014**: System MUST ensure that header and footer remain fixed while middle content scrolls.
