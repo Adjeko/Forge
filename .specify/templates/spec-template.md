@@ -113,3 +113,15 @@
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+
+## Accessibility & Interaction Mapping *(required for any interactive UI)*
+
+List every user action exposed by this feature with its modality parity. No row may omit a hotkey or BubbleZone ID.
+
+| Action | Description | Hotkey(s) | BubbleZone ID | Notes |
+|--------|-------------|-----------|---------------|-------|
+| [e.g., Run Workflow] | Execute current workflow | r / Enter | zone_run_button | Primary action |
+| [e.g., Cancel] | Abort running workflow | Esc / c | zone_cancel_button | Global Esc honored |
+| [e.g., Help] | Toggle help overlay | ? | zone_help_toggle | Must display within 150ms |
+
+Add additional rows as needed. If an action intentionally lacks one modality, provide explicit justification (must align with constitution Principle VI; absence strongly discouraged).

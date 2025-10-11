@@ -155,6 +155,9 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
+- [ ] TXXX Verify hotkey ↔ BubbleZone parity (no missing modality)
+- [ ] TXXX Add/update help overlay listing actions & hotkeys
+- [ ] TXXX Focus traversal audit (Tab/Shift+Tab, arrows) & visual indication
 
 ---
 

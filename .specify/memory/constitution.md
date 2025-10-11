@@ -1,15 +1,17 @@
 <!--
 Sync Impact Report
-Version change: 1.1.1 → 1.2.0 (MINOR)
+Version change: 1.2.0 → 1.3.0 (MINOR)
 Modified principles:
-	II. Charm Ecosystem Compliance → Expanded with composition-first mandate
-Added sections: None
+	Added new Principle VI: Accessibility & Dual Input (Hotkeys + Mouse)
+Added sections: None (principle appended)
 Removed sections: None
 Templates requiring updates:
-	✅ .specify/templates/plan-template.md (added composition-first gate)
-	✅ .specify/templates/tasks-template.md (added guidance for composing UI components)
-	⚠ README.md (add note about composition-first rule for contributors)
-Follow-up TODOs: None
+	✅ .specify/templates/plan-template.md (added accessibility gate)
+	✅ .specify/templates/spec-template.md (added accessibility mapping guidance)
+	✅ .specify/templates/tasks-template.md (tasks must include hotkey + BubbleZone binding steps)
+	⚠ README.md (document universal hotkey conventions & interaction parity)
+Follow-up TODOs:
+	TODO(README): Add table of global hotkeys & interaction zones
 -->
 
 # Forge Constitution
@@ -47,6 +49,18 @@ Rationale: Prevents regressions and ensures seamless user experience across all 
 Forge MUST provide structured logging for all major actions and errors. Simplicity is enforced: avoid unnecessary features, keep UI minimal, and follow YAGNI (You Aren't Gonna Need It) principles.
 Rationale: Improves debuggability and keeps the app maintainable and user-friendly.
 
+### VI. Accessibility & Dual Input (Hotkeys + Mouse)
+Every user-facing action MUST be operable via keyboard hotkeys AND via mouse (BubbleZone clickable areas) with functional parity. No feature may exist that is only accessible by mouse or only by keyboard. All interactive regions MUST register BubbleZone hit areas; all actions MUST have mnemonic or consistent hotkey bindings (e.g., first letter, or global scheme). Hotkeys MUST be discoverable: either listed in a contextual help panel, footer hint, or inline legend. Navigation between focusable elements MUST be possible with standard keys (Tab/Shift+Tab or arrow keys) and MUST update visual focus state.
+
+Normative rules:
+1. Parity: For each command/action, doc MUST show: Action | Hotkey(s) | BubbleZone ID.
+2. Discoverability: Pressing a universal help key (e.g., `?`) MUST toggle an overlay showing available hotkeys for current context within 150ms.
+3. Consistency: Global hotkeys (`q` quit, `?` help, `Esc` cancel/close, `Enter` confirm) MUST NOT be repurposed locally without justification.
+4. Focus Management: Focus changes MUST be visually indicated (style or cursor) and never lost on window resize.
+5. No Hidden Zones: BubbleZone areas MUST match visible interactive UI; invisible click targets are prohibited.
+
+Rationale: Ensures Forge is usable efficiently by power users (keyboard) and discoverable for exploratory users (mouse), improving accessibility, lowering learning curve, and enabling mixed-modality workflows.
+
 ## Technology Stack & Constraints
 Forge is written in Go. All TUI components MUST use Charm libraries (Bubbletea, Bubble, Lipgloss, Huh, BubbleZone). No other UI libraries are permitted unless explicitly justified and documented. All dependencies MUST be open source and actively maintained.
 
@@ -71,4 +85,4 @@ Templates requiring updates:
 Follow-up TODOs:
 TODO(RATIFICATION_DATE): Set original ratification date if known
 -->
-**Version**: 1.2.0 | **Ratified**: 2025-10-10 | **Last Amended**: 2025-10-10
+**Version**: 1.3.0 | **Ratified**: 2025-10-10 | **Last Amended**: 2025-10-10
