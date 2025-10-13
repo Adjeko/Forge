@@ -1,0 +1,18 @@
+#### Initial-Datei für Befehle / Abläufe / Status ####
+# Neue Einträge werden zur Laufzeit über den Dialog (Ctrl+B / Ctrl+A / Ctrl+S + Ctrl+N) angelegt.
+
+[[befehle]]
+label = 'Git'
+  [[befehle.children]]
+  label = 'Status'
+  description = 'Zeigt den Git Status eines Repositories (Pfad wird abgefragt)'
+  command = 'git'
+  args = ['status']
+  # workdir leer -> Pfad wird bei Ausführung abgefragt
+
+  [[befehle.children]]
+  label = 'Fetch'
+  description = 'Führt git fetch ohne weitere Eingaben aus'
+  command = 'git'
+  args = ['fetch']
+  workdir = 'C:/ADO/CS2'

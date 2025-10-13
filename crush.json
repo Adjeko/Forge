@@ -1,0 +1,32 @@
+{
+  "$schema": "https://charm.land/crush.json",
+  "lsp": {
+    "go": {
+      "command": "gopls",
+      "env": {
+        "GOTOOLCHAIN": "go1.24.5"
+      }
+    }
+  },
+  "providers": {
+    "github copilot": {
+      "name": "github copilot",
+      "base_url": "http://localhost:4141",
+      "type": "openai",
+      "models": [
+        {
+          "name": "GPT-4.1",
+          "id": "gpt-4.1",
+          "context_window": 128000,
+          "default_max_tokens": 20000
+        },
+        {
+          "name": "GPT-5",
+          "id": "gpt-5",
+          "context_window": 256000,
+          "default_max_tokens": 20000
+        }
+      ]
+    }
+  }
+}
