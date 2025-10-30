@@ -105,20 +105,126 @@ func (h headerModel) View() string {
 	linkerBlockSew := 10   // Abstand vor SEW (wieder auf 10 gesetzt)
 	linkerBlockForge := 10 // Abstand vor FORGE-Zeilen (wieder auf 10 gesetzt)
 
-	// ZEILE 1: SEW mit Muster links & rechts, jeweils mit 1 Leerzeichen Abstand.
-	wort := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#E30018")).Render("SEW")
-	wortLen := visible(wort)
-	// Benötigte Zusatzbreite (2 Leerzeichen) berücksichtigen.
-	benoetigt := wortLen + 2
-	if h.breite < benoetigt {
-		return wort // extrem schmal, keine Muster sinnvoll
+	// Breite des FORGE-Artworks bestimmen um das rechte Muster exakt ab dieser Spalte zu starten.
+	// Dafür eine Probe der Roh-FORGE-Zeilen ohne Farben erstellen wie in RenderForgeLines.
+	F5 := []string{"████████", "█      ", "███████ ", "█      ", "█      "}
+	O5 := []string{" █████ ", "█     █", "█     █", "█     █", " █████ "}
+	R5 := []string{"███████ ", "█     █", "███████ ", "█    █ ", "█     █"}
+	G5 := []string{" █████ ", "█      ", "█  ███ ", "█    █ ", " █████ "}
+	E5 := []string{"████████", "█      ", "███████ ", "█      ", "████████"}
+	compress5to3Local := func(rows []string) []string {
+		width := 0
+		for _, r := range rows {
+			if len(r) > width {
+				width = len(r)
+			}
+		}
+		padded := make([][]rune, 5)
+		for i := 0; i < 5; i++ {
+			rr := []rune(rows[i])
+			if len(rr) < width {
+				tmp := make([]rune, width)
+				copy(tmp, rr)
+				for j := len(rr); j < width; j++ {
+					tmp[j] = ' '
+				}
+				rr = tmp
+			}
+			padded[i] = rr
+		}
+		out := make([]string, 3)
+		pairs := [][2]int{{0, 1}, {2, 3}, {4, -1}}
+		for idx, pair := range pairs {
+			var b strings.Builder
+			topIdx, botIdx := pair[0], pair[1]
+			for c := 0; c < width; c++ {
+				top := padded[topIdx][c] != ' '
+				bottom := false
+				if botIdx >= 0 {
+					bottom = padded[botIdx][c] != ' '
+				}
+				var ch rune
+				switch {
+				case top && bottom:
+					ch = '█'
+				case top && !bottom:
+					ch = '▀'
+				case !top && bottom:
+					ch = '▄'
+				default:
+					ch = ' '
+				}
+				b.WriteRune(ch)
+			}
+			out[idx] = b.String()
+		}
+		return out
 	}
-	leftLen := linkerBlockSew
-	if leftLen > h.breite-benoetigt {
-		leftLen = h.breite - benoetigt
+	normalizeLetterLocal := func(rows []string) []string {
+		trimmed := make([]string, len(rows))
+		maxw := 0
+		for i, r := range rows {
+			tr := strings.TrimRight(r, " ")
+			trimmed[i] = tr
+			if lw := len([]rune(tr)); lw > maxw {
+				maxw = lw
+			}
+		}
+		out := make([]string, len(rows))
+		for i, tr := range trimmed {
+			lw := len([]rune(tr))
+			if lw < maxw {
+				tr = tr + strings.Repeat(" ", maxw-lw)
+			}
+			out[i] = tr
+		}
+		return out
 	}
-	rightLen := h.breite - leftLen - benoetigt
-	zeile1 := patternFill(leftLen) + " " + wort + " " + patternFill(rightLen)
+	F3 := normalizeLetterLocal(compress5to3Local(F5))
+	O3 := normalizeLetterLocal(compress5to3Local(O5))
+	R3 := normalizeLetterLocal(compress5to3Local(R5))
+	G3 := normalizeLetterLocal(compress5to3Local(G5))
+	E3 := normalizeLetterLocal(compress5to3Local(E5))
+	spacer := " "
+	artWidth := 0
+	for i := 0; i < 3; i++ {
+		r := F3[i] + spacer + O3[i] + spacer + R3[i] + spacer + G3[i] + spacer + E3[i]
+		if l := len([]rune(r)); l > artWidth {
+			artWidth = l
+		}
+	}
+
+	// Layout erste Zeile:
+	// Linkes Muster (wie gehabt linkerBlockSew), dann ein Leerzeichen, dann SEW, dann ein Raum bis zur Spalte artWidth,
+	// in diesem Raum rechtsbündig Versionsstring, danach startet das rechte Muster.
+	sewText := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#E30018")).Render("SEW")
+	versionPlain := "v0.0.1"
+	versionStyled := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#E30018")).Render(versionPlain)
+	sewLen := visible(sewText)
+	versionLen := len([]rune(versionPlain))
+	// Mindestbreite prüfen
+	minNeeded := linkerBlockSew + 1 + sewLen + 1 + versionLen // grob für Raum + rechte Muster-Start
+	if h.breite < minNeeded {
+		return sewText
+	} // zu schmal, fallback
+	leftPattern := patternFill(linkerBlockSew)
+	// Bereich zwischen Ende SEW und artWidth
+	spaceBetween := artWidth - sewLen
+	if spaceBetween < versionLen+1 { // +1 für Mindestabstand
+		spaceBetween = versionLen + 1
+	}
+	// Version rechtsbündig in spaceBetween
+	padLen := spaceBetween - versionLen
+	zwischenBlock := strings.Repeat(" ", padLen) + versionStyled
+	// Rechtes Muster beginnt ab Gesamtlänge: linkerPattern + Leerzeichen + SEW + zwischenBlock
+	// Ein zusätzliches Leerzeichen nach der Version vor dem rechten Muster einkalkulieren.
+	used := visible(leftPattern) + 1 + sewLen + visible(zwischenBlock) + 1
+	rightAvail := h.breite - used
+	if rightAvail < 0 {
+		rightAvail = 0
+	}
+	rightPattern := patternFill(rightAvail)
+	zeile1 := leftPattern + " " + sewText + zwischenBlock + " " + rightPattern
 
 	// FORGE-Zeilen generieren (bestehende Farbverläufe beibehalten) und links/rechts mit Muster füllen.
 	forgeRaw := RenderForgeLines(h.breite)
