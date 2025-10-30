@@ -105,19 +105,20 @@ func (h headerModel) View() string {
 	linkerBlockSew := 10   // Abstand vor SEW (wieder auf 10 gesetzt)
 	linkerBlockForge := 10 // Abstand vor FORGE-Zeilen (wieder auf 10 gesetzt)
 
-	// ZEILE 1: SEW mit Muster links & rechts.
+	// ZEILE 1: SEW mit Muster links & rechts, jeweils mit 1 Leerzeichen Abstand.
 	wort := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#E30018")).Render("SEW")
 	wortLen := visible(wort)
-	// Edge Case: Terminal kleiner als Platz für Wort -> Wort ggf. einkürzen ohne ANSI (hier vereinfachend komplett weglassen wenn zu klein)
-	if h.breite < wortLen+1 {
-		return wort // extrem schmal, kein Muster sinnvoll
+	// Benötigte Zusatzbreite (2 Leerzeichen) berücksichtigen.
+	benoetigt := wortLen + 2
+	if h.breite < benoetigt {
+		return wort // extrem schmal, keine Muster sinnvoll
 	}
 	leftLen := linkerBlockSew
-	if leftLen > h.breite-wortLen {
-		leftLen = h.breite - wortLen
+	if leftLen > h.breite-benoetigt {
+		leftLen = h.breite - benoetigt
 	}
-	rightLen := h.breite - leftLen - wortLen
-	zeile1 := patternFill(leftLen) + wort + patternFill(rightLen)
+	rightLen := h.breite - leftLen - benoetigt
+	zeile1 := patternFill(leftLen) + " " + wort + " " + patternFill(rightLen)
 
 	// FORGE-Zeilen generieren (bestehende Farbverläufe beibehalten) und links/rechts mit Muster füllen.
 	forgeRaw := RenderForgeLines(h.breite)
@@ -126,9 +127,8 @@ func (h headerModel) View() string {
 	}
 	forgeOut := make([]string, 3)
 	for i := 0; i < 3; i++ {
-		// Führende Einrückung entfernen, um Platz für Muster zu schaffen.
 		line := forgeRaw[i]
-		// Zähle führende Spaces bis max linkerBlockForge.
+		// Führende Einrückung entfernen bis zur gewünschten linken Musterbreite.
 		cut := 0
 		for _, r := range line {
 			if r == ' ' && cut < linkerBlockForge {
@@ -139,16 +139,21 @@ func (h headerModel) View() string {
 		}
 		lineContent := line[cut:]
 		contentWidth := visible(lineContent)
-		left := patternFill(linkerBlockForge)
-		// Rest rechts berechnen
-		rechtsLen := h.breite - linkerBlockForge - contentWidth
-		if rechtsLen < 0 {
-			rechtsLen = 0 // Falls zu breit – nicht hart kürzen (Gradient enthält ANSI Sequenzen)
+		// Benötigte Breite: linkes Muster + 2 Leerzeichen (eins nach linkem Muster, eins vor rechtem Muster) + Inhalt + rechtes Muster.
+		leftPattern := patternFill(linkerBlockForge)
+		// Restbreite für rechtes Muster berechnen.
+		rest := h.breite - linkerBlockForge - contentWidth - 2 // -2 für die beiden Leerzeichen
+		if rest < 0 {
+			rest = 0
 		}
-		forgeOut[i] = left + lineContent + patternFill(rechtsLen)
+		rightPattern := patternFill(rest)
+		forgeOut[i] = leftPattern + " " + lineContent + " " + rightPattern
 	}
 
-	return strings.Join([]string{zeile1, forgeOut[0], forgeOut[1], forgeOut[2]}, "\n")
+	// Zusätzliche fünfte Zeile: komplettes Muster über gesamte Breite
+	extraLine := patternFill(h.breite)
+
+	return strings.Join([]string{zeile1, forgeOut[0], forgeOut[1], forgeOut[2], extraLine}, "\n")
 }
 
 // Lokale forgeLines Implementierung entfernt; stattdessen RenderForgeLines (forgeTitle.go) genutzt.

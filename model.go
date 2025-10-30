@@ -54,8 +54,18 @@ func (m model) View() string {
 	titelStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("205"))
 	content := titelStyle.Render("SEW Forge")
 
-	// Restliche Höhe nach Abzug des Headers bestimmen (4 feste Zeilen Header).
-	verfuegbareHoehe := m.hoehe - 4
+	// Dynamische Höhe des Headers bestimmen (Zeilen zählen statt feste 4).
+	zeilenHeader := 0
+	if head != "" {
+		for _, c := range head {
+			if c == '\n' {
+				zeilenHeader++
+			}
+		}
+		// Anzahl Newlines + 1 = Zeilen (außer leer)
+		zeilenHeader++
+	}
+	verfuegbareHoehe := m.hoehe - zeilenHeader
 	if verfuegbareHoehe < 1 {
 		verfuegbareHoehe = 1
 	}
