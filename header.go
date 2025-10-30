@@ -84,90 +84,71 @@ func (h headerModel) View() string {
 	if !h.fertig {
 		return "" // Keine Ausgabe bis Breite bekannt
 	}
-	// Basis-Muster.
-	muster := "//////"
-	// Wie oft muss das Muster wiederholt werden um mindestens die Breite zu erreichen?
-	wiederholungen := h.breite/len(muster) + 1
-	linieBasis := strings.Repeat(muster, wiederholungen)
-	// Erzeuge Gradient Styles (Start -> Ende) mit gewünschter Stufenzahl.
-	// h.stufen = 0 bedeutet automatische Heuristik; >0 setzt explizite Segmentanzahl.
-	styles := gradientStyles("#e30018", "#dfaeb3", h.breite, h.stufen)
-
-	// Hilfsfunktion zur Anwendung des Gradienten auf eine Zeile.
-	// Jede Zeile wird in gleich große Segmente geschnitten; Rest hängt an das letzte Segment.
-	// Verarbeitung erfolgt auf Rune-Ebene damit Mehrbyte-Zeichen (▀▄█ usw.) nicht zerstückelt werden.
-	var renderGradient = func(roherText string, bold bool, suffix string) string {
-		if len(roherText) == 0 {
+	// Stil für das Muster "///" in gewünschter Farbe (#E30018)
+	musterStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#E30018")).Bold(true)
+	unit := "///"
+	// Hilfsfunktion zum Erzeugen eines gefärbten Musters mit exakt gewünschter sichtbarer Länge.
+	patternFill := func(l int) string {
+		if l <= 0 {
 			return ""
 		}
-		// In Runen umwandeln für korrekte Zeichenbreiten-Verarbeitung.
-		runes := []rune(roherText)
-		breite := len(runes)
-		segmente := len(styles)
-		if segmente == 0 {
-			return roherText + suffix
-		}
-		basisLaenge := breite / segmente
-		rest := breite % segmente
-		var teile []string
-		offset := 0
-		for s := 0; s < segmente; s++ {
-			laenge := basisLaenge
-			if s == segmente-1 { // letztes Segment bekommt Rest
-				laenge += rest
-			}
-			if laenge <= 0 {
+		repeat := l/len(unit) + 2 // +2 Sicherheitszugabe
+		roh := strings.Repeat(unit, repeat)
+		roh = roh[:l]
+		return musterStyle.Render(roh)
+	}
+
+	// Sichtbare Länge einer Zeichenkette (ANSI-fähig)
+	visible := func(s string) int { return lipgloss.Width(s) }
+
+	// Konfigurierbare linke Abstände für SEW und FORGE separat, um Leerraum zu minimieren.
+	linkerBlockSew := 10   // Abstand vor SEW (wieder auf 10 gesetzt)
+	linkerBlockForge := 10 // Abstand vor FORGE-Zeilen (wieder auf 10 gesetzt)
+
+	// ZEILE 1: SEW mit Muster links & rechts.
+	wort := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#E30018")).Render("SEW")
+	wortLen := visible(wort)
+	// Edge Case: Terminal kleiner als Platz für Wort -> Wort ggf. einkürzen ohne ANSI (hier vereinfachend komplett weglassen wenn zu klein)
+	if h.breite < wortLen+1 {
+		return wort // extrem schmal, kein Muster sinnvoll
+	}
+	leftLen := linkerBlockSew
+	if leftLen > h.breite-wortLen {
+		leftLen = h.breite - wortLen
+	}
+	rightLen := h.breite - leftLen - wortLen
+	zeile1 := patternFill(leftLen) + wort + patternFill(rightLen)
+
+	// FORGE-Zeilen generieren (bestehende Farbverläufe beibehalten) und links/rechts mit Muster füllen.
+	forgeRaw := RenderForgeLines(h.breite)
+	for len(forgeRaw) < 3 {
+		forgeRaw = append(forgeRaw, "")
+	}
+	forgeOut := make([]string, 3)
+	for i := 0; i < 3; i++ {
+		// Führende Einrückung entfernen, um Platz für Muster zu schaffen.
+		line := forgeRaw[i]
+		// Zähle führende Spaces bis max linkerBlockForge.
+		cut := 0
+		for _, r := range line {
+			if r == ' ' && cut < linkerBlockForge {
+				cut++
 				continue
 			}
-			segmentRunes := runes[offset : offset+laenge]
-			segmentText := string(segmentRunes)
-			st := styles[s]
-			if bold {
-				st = st.Bold(true)
-			}
-			teile = append(teile, st.Render(segmentText))
-			offset += laenge
+			break
 		}
-		if suffix != "" {
-			// Suffix separat stylen (Bold wenn gefordert, gleiche letzte Farbe für optisch weichen Übergang)
-			st := styles[len(styles)-1]
-			if bold {
-				st = st.Bold(true)
-			}
-			teile = append(teile, st.Render(suffix))
+		lineContent := line[cut:]
+		contentWidth := visible(lineContent)
+		left := patternFill(linkerBlockForge)
+		// Rest rechts berechnen
+		rechtsLen := h.breite - linkerBlockForge - contentWidth
+		if rechtsLen < 0 {
+			rechtsLen = 0 // Falls zu breit – nicht hart kürzen (Gradient enthält ANSI Sequenzen)
 		}
-		return strings.Join(teile, "")
+		forgeOut[i] = left + lineContent + patternFill(rechtsLen)
 	}
 
-	// Erste Zeile mit Wort "SEW" so ausrichten, dass das 'S' unter dem 'F' des FORGE-Schriftzuges steht (Einzug 10).
-	einzug := strings.Repeat(" ", 10)
-	sew := "SEW"
-	// Verfügbare Breite für Auffüllmuster links und rechts bestimmen.
-	// Gesamte Zeile: Einzug + SEW + rechts Rest mit Muster füllen.
-	var erste string
-	if h.breite <= len(einzug)+len(sew) { // Edge Case: sehr schmale Breite
-		basis := einzug + sew
-		if len(basis) > h.breite {
-			basisRunes := []rune(basis)
-			basis = string(basisRunes[:h.breite])
-		}
-		erste = renderGradient(basis, true, "")
-	} else {
-		restBreite := h.breite - (len(einzug) + len(sew))
-		auffuell := linieBasis
-		if len(auffuell) > restBreite {
-			auffuell = auffuell[:restBreite]
-		}
-		roh := einzug + sew + auffuell
-		erste = renderGradient(roh, true, "")
-	}
-
-	// Untere drei Zeilen durch ausgelagerte Funktion RenderForgeLines ersetzen.
-	forge := RenderForgeLines(h.breite)
-	for len(forge) < 3 { // Absicherung bei extrem kleiner Breite
-		forge = append(forge, "")
-	}
-	return strings.Join([]string{erste, forge[0], forge[1], forge[2]}, "\n")
+	return strings.Join([]string{zeile1, forgeOut[0], forgeOut[1], forgeOut[2]}, "\n")
 }
 
 // Lokale forgeLines Implementierung entfernt; stattdessen RenderForgeLines (forgeTitle.go) genutzt.

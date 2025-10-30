@@ -136,9 +136,8 @@ func RenderForgeLines(w int) []string {
 	for i := 0; i < 3; i++ {
 		rows[i] = F3[i] + spacer + O3[i] + spacer + R3[i] + spacer + G3[i] + spacer + E3[i]
 	}
-	einzug := strings.Repeat(" ", 10)
 	for i, r := range rows {
-		full := einzug + r
+		full := r // Keine zusätzliche Einrückung mehr: 'F' beginnt ganz links
 		// Kürzen falls zu breit
 		runes := []rune(full)
 		if len(runes) > w {
