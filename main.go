@@ -13,7 +13,12 @@ import (
 
 // Modell repräsentiert den UI-Zustand.
 // Deutsche Kommentare gemäß Leitplanken.
-type model struct{}
+// model hält den dynamischen Zustand inkl. Terminalgröße.
+type model struct {
+	breite int
+	hoehe  int
+	bereit bool // Flag ob erste Größe empfangen wurde
+}
 
 // initialModel erzeugt das Startmodell.
 func initialModel() model { return model{} }
@@ -24,20 +29,34 @@ func (m model) Init() tea.Cmd { return nil }
 
 // Update verarbeitet Nachrichten (Events).
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
+	switch nachricht := msg.(type) {
 	case tea.KeyMsg:
 		// Beenden bei Ctrl+C oder q.
-		if msg.Type == tea.KeyCtrlC || msg.String() == "q" {
+		if nachricht.Type == tea.KeyCtrlC || nachricht.String() == "q" {
 			return m, tea.Quit
 		}
+	case tea.WindowSizeMsg:
+		// Terminalgröße speichern und Flag setzen.
+		m.breite = nachricht.Width
+		m.hoehe = nachricht.Height
+		m.bereit = true
 	}
 	return m, nil
 }
 
 // View rendert die Oberfläche.
 func (m model) View() string {
-	style := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("205"))
-	return style.Render("SEW Forge") + "\n"
+	// Falls Größe noch nicht verfügbar, Hinweis anzeigen.
+	if !m.bereit {
+		return "Initialisiere Ansicht ..."
+	}
+
+	titelStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("205"))
+	// Inhalt vorbereiten.
+	content := titelStyle.Render("SEW Forge")
+
+	// Vollbildplatzierung mit Zentrierung.
+	return lipgloss.Place(m.breite, m.hoehe, lipgloss.Center, lipgloss.Center, content)
 }
 
 func main() {
@@ -45,7 +64,8 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	p := tea.NewProgram(initialModel(), tea.WithContext(ctx))
+	// Alt-Screen aktivieren um gesamten Terminalbereich exklusiv zu nutzen.
+	p := tea.NewProgram(initialModel(), tea.WithContext(ctx), tea.WithAltScreen())
 
 	if _, err := p.Run(); err != nil {
 		// Fehler wird klar ausgegeben, kein Panic.
