@@ -1,4 +1,4 @@
-module sewworkspacemanager
+module Forge
 
 go 1.24.5
 
