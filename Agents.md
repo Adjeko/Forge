@@ -18,6 +18,7 @@ Dieser Text enthält ausschließlich die unumstößlichen, harten Leitplanken.
 12. Einzelentwickler-Fokus: Priorität hat klare Verständlichkeit des Codes, einfache Erweiterbarkeit und geringe kognitive Last gegenüber komplexer Architektur oder überoptimierter Abstraktion.
 13. Deutsche Kommentare: Quellcode-Kommentare werden ausschließlich in deutscher Sprache verfasst.
 14. Deutsche Ausgabe: Der Agent verwendet in seiner Benutzer-Ausgabe ausschließlich die deutsche Sprache (UI, Logs, Fehlerhinweise), außer ein expliziter Nutzerwunsch verlangt Mehrsprachigkeit.
+15. Model-Struktur: Jedes UI-Model besteht zwingend aus einem `struct`, der alle dafür notwendigen Zustands-Variablen enthält, sowie genau den Methoden `Init`, `Update` und `View`. Neue, eigenständige Anzeige- oder Interaktions-Elemente werden so klein wie möglich gehalten und in eigene, separierte Model-Implementierungen ausgelagert (Kompositionsansatz statt monolithischer Wachstum). Keine überflüssigen Methoden oder Felder.
 
 ## Nicht-Ziele (implizit ausgeschlossen)
 - Nutzung alternativer UI-Frameworks außerhalb Charm Stack.
