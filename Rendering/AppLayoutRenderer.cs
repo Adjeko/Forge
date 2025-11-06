@@ -23,7 +23,7 @@ internal static class AppLayoutRenderer
 
         layout["header"].Update(new Header());
         layout["content"].Update(BuildContent());
-        layout["footer"].Update(BuildFooter());
+    layout["footer"].Update(new Footer());
 
         return layout;
     }
@@ -40,12 +40,4 @@ internal static class AppLayoutRenderer
         return panel;
     }
 
-    private static IRenderable BuildFooter()
-    {
-        var grid = new Grid();
-        grid.AddColumn();
-        grid.AddRow(new Markup("[blue]Status:[/] Bereit"));
-        grid.AddRow(new Markup("[dim]Forge © 2025[/]"));
-        return grid;
-    }
 }
