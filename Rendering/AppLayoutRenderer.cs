@@ -16,7 +16,7 @@ internal static class AppLayoutRenderer
     {
         var layout = new Layout("root")
             .SplitRows(
-                new Layout("header").Size(3), // Header jetzt dreizeilig für ASCII-FORGE
+                new Layout("header").Size(5), // Header jetzt fünfzeilig für ASCII-FORGE
                 new Layout("content"),
                 new Layout("footer").Size(2)
             );
@@ -34,13 +34,14 @@ internal static class AppLayoutRenderer
         // Konvention: Zeile 1 (Top) vorwiegend "▀", Mitte "█", unten Abschluss mit "▄"-Sequenzen.
         // Nur Spectre.Console Rendering APIs, keine direkten ANSI-Sequenzen.
 
-        var top    = "█▀▀▀ █▀▀█ █▀▀█ ▀▀▀▄ █▀▀▀";   // F     O     R     G     E
-        var middle = "█▀▀▀ █  █ █▀▀█ █  █ █▀▀▀";       // Vertikale Segmente / Öffnungen
-        var bottom = "█    █▄▄█ █  █ █▄▄█ █▄▄▄";     // Untere Abschlüsse / Innenräume
+        var version= "SEW                                v0.0.1";
+        var top    = "█▀▀▀▀▀▀▀ ▄▀▀▀▀▀▄ █▀▀▀▀▀█ ▄▀▀▀▀▀▀ █▀▀▀▀▀▀▀";   // F     O     R     G     E
+        var middle = "█▀▀▀▀▀▀  █     █ █▀▀▀▀█▀ █   ▀▀█ █▀▀▀▀▀▀ ";       // Vertikale Segmente / Öffnungen
+        var bottom = "▀         ▀▀▀▀▀  ▀     ▀  ▀▀▀▀▀▀ ▀▀▀▀▀▀▀▀";     // Untere Abschlüsse / Innenräume
 
         var grid = new Grid();
         grid.AddColumn();
-        grid.AddRow(new Markup("[bold red]SEW v0.0.1[/]"));
+        grid.AddRow(new Markup("[bold red]" + version +"[/]"));
         grid.AddRow(new Markup(top));
         grid.AddRow(new Markup(middle));
         grid.AddRow(new Markup(bottom));
