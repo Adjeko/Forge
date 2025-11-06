@@ -21,68 +21,11 @@ internal static class AppLayoutRenderer
                 new Layout("footer").Size(2)
             );
 
-        layout["header"].Update(BuildHeader());
+        layout["header"].Update(new Header());
         layout["content"].Update(BuildContent());
         layout["footer"].Update(BuildFooter());
 
         return layout;
-    }
-
-    private static IRenderable BuildHeader()
-    {
-        // Dreizeilige Darstellung des Wortes FORGE aus den Zeichen █, ▀, ▄
-        // Konvention: Zeile 1 (Top) vorwiegend "▀", Mitte "█", unten Abschluss mit "▄"-Sequenzen.
-        // Nur Spectre.Console Rendering APIs, keine direkten ANSI-Sequenzen.
-
-        var version = "SEW                                v0.0.1";
-        var top     = "█▀▀▀▀▀▀▀ ▄▀▀▀▀▀▄ █▀▀▀▀▀█ ▄▀▀▀▀▀▀ █▀▀▀▀▀▀▀";   // F     O     R     G     E
-        var middle  = "█▀▀▀▀▀▀  █     █ █▀▀▀▀█▀ █   ▀▀█ █▀▀▀▀▀▀ ";       // Vertikale Segmente / Öffnungen
-        var bottom  = "▀         ▀▀▀▀▀  ▀     ▀  ▀▀▀▀▀▀ ▀▀▀▀▀▀▀▀";     // Untere Abschlüsse / Innenräume
-
-        // Jede Zeile: links ////, dann Inhalt, danach //// wiederholt bis zum Bildschirmrand.
-        // Verzicht auf manuelles Schreiben von ANSI-Sequenzen – reine Spectre-Markup Strings.
-        var width = AnsiConsole.Profile.Width;
-    string LeftPattern = "////"; // Basismuster links
-        string FillerPattern = "////"; // wird wiederholt
-
-        string BuildLine(string content, string color = null)
-        {
-            var main = color is null ? content : $"[{color}]{content}[/]";
-            // Gesamtlänge ohne Farb-Markup zählen: LeftPattern + 1 Space + content + 1 Space
-            int visibleLen = LeftPattern.Length + 1 + content.Length + 1;
-            int remaining = width - visibleLen;
-            if (remaining <= 0)
-                return $"[red]{LeftPattern}[/] {main}"; // kein Platz für Füller, mindestens ein Space nach Pattern
-
-            // Füller erzeugen
-            var fillerBuilder = new System.Text.StringBuilder(remaining);
-            while (fillerBuilder.Length < remaining)
-            {
-                var next = FillerPattern;
-                if (fillerBuilder.Length + next.Length > remaining)
-                {
-                    next = next.Substring(0, remaining - fillerBuilder.Length);
-                }
-                fillerBuilder.Append(next);
-            }
-            var filler = fillerBuilder.ToString();
-            return $"[red]{LeftPattern}[/] {main} [red]{filler}[/]";
-        }
-
-        var lines = new[]
-        {
-            BuildLine(version, "bold red"),
-            BuildLine(top),
-            BuildLine(middle),
-            BuildLine(bottom),
-            BuildLine("Hallo Welt", "green")
-        };
-
-        var grid = new Grid();
-        grid.AddColumn(new GridColumn().Padding(0,0,0,0));
-        foreach (var line in lines)
-            grid.AddRow(new Markup(line));
-        return grid;
     }
 
     private static IRenderable BuildContent()
