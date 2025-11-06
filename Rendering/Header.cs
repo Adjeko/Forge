@@ -68,7 +68,7 @@ internal sealed class Header : IRenderable
             BuildLine(Top),
             BuildLine(Middle),
             BuildLine(Bottom),
-            BuildLine("Hallo Welt", "green")
+            BuildLine("/////////////////////////////////////////", "red")
         };
 
         var grid = new Grid();
