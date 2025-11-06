@@ -7,7 +7,7 @@ namespace Forge.Rendering;
 /// Erzeugt das Grundlayout der Anwendung: 5 Zeilen Header, flexibler Inhalt, 2 Zeilen Footer.
 /// Kapselt ausschließlich Spectre.Console Aufrufe gemäß Richtlinien.
 /// </summary>
-internal static class AppLayoutRenderer
+internal static class MainLayout
 {
     /// <summary>
     /// Baut ein neues Layout für die aktuelle Render-Periode.
@@ -23,7 +23,7 @@ internal static class AppLayoutRenderer
 
         layout["header"].Update(new Header());
         layout["content"].Update(BuildContent());
-    layout["footer"].Update(new Footer());
+        layout["footer"].Update(new Footer());
 
         return layout;
     }

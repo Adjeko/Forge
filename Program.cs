@@ -36,7 +36,7 @@ internal static class Program
 	private static void Render()
 	{
 		AnsiConsole.Clear();
-		var layout = AppLayoutRenderer.Build();
+		var layout = MainLayout.Build();
 		AnsiConsole.Write(layout);
 	}
 }
