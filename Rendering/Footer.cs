@@ -26,8 +26,14 @@ internal sealed class Footer : IRenderable
     {
         var grid = new Grid();
         grid.AddColumn();
-        grid.AddRow(new Markup("[blue]Status:[/] Bereit"));
-        grid.AddRow(new Markup("[dim]Forge © 2025[/]"));
+
+        // Hotkey-Legende (nur vorhandene, erweitert werden wenn neue Keys implementiert werden)
+        var legendTable = new Table().NoBorder().AddColumn("Hotkeys");
+        legendTable.HideHeaders();
+        legendTable.AddRow(new Markup("[grey]Esc[/] : Beenden"));
+        // Weitere Einträge können hier hinzugefügt werden, sobald zusätzliche Tasten unterstützt werden.
+        grid.AddRow(legendTable);
+
         return grid;
     }
 }
