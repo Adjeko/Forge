@@ -1,5 +1,5 @@
 ﻿using Spectre.Console;
-using System.Text;
+using Forge.Rendering;
 
 namespace Forge;
 
@@ -7,7 +7,7 @@ internal static class Program
 {
 	private static void Main()
 	{
-		Console.CursorVisible = false;
+		AnsiConsole.Cursor.Hide();
 		Render();
 
 		int lastW = Console.WindowWidth;
@@ -28,12 +28,15 @@ internal static class Program
 				Render();
 			}
 
-			Thread.Sleep(150);
+			Thread.Sleep(250);
 		}
-		Console.CursorVisible = true;
+		AnsiConsole.Cursor.Show();
 	}
 
 	private static void Render()
 	{
+		AnsiConsole.Clear();
+		var layout = AppLayoutRenderer.Build();
+		AnsiConsole.Write(layout);
 	}
 }
