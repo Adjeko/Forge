@@ -15,18 +15,22 @@ Dieses Repository enthält eine reine Terminal User Interface (TUI) Anwendung. Z
 5. Keine direkten ANSI-Escape-Sequenzen schreiben (kein `\u001b[...]`). Farb- und Stilsteuerung ausschließlich über Spectre-Markup oder API.
 6. Output soll deterministisch, strukturiert und klar gegliedert sein. Wiederverwendbare Render-Komponenten kapseln.
 7. Commands folgen den Spectre.Console.Cli-Konventionen (Settings-Klassen, Validierung über Attributes / Overrides / TypeConverter, konsistente Hilfeausgabe).
+8. Interaktion mit externen Tools (z.B. `git`, `docker`, `dotnet`) erfolgt ausschließlich über deren native CLI-Aufrufe (Prozessstart, z.B. `git status`). Keine Client-/SDK-Libraries (LibGit2Sharp, Docker.DotNet, etc.) für einfache Terminal-Befehle einbinden. Ausgabe erfassen und bei Bedarf strukturiert mit Spectre-Komponenten darstellen.
 
 ## Do / Don't
 **Do:**
 - `AnsiConsole.Markup`, `AnsiConsole.Write`, `Table`, `Tree`, `Progress`, `Panel`, `Rule`, `BarChart`, `FigletText`, `Status`, `Prompt` verwenden.
 - Command-Struktur über `CommandApp` und `ICommand`/`Command<TSettings>` organisieren.
 - Wiederverwendbare Komponenten als kleine Hilfsklassen / Renderer kapseln (sofern sie ausschließlich Spectre-Aufrufe orchestrieren).
+- Externe Tools per Prozess (`git`, `dotnet`, `docker`, etc.) aufrufen und deren rohen Output (stdout/stderr) einlesen, anschließend passend rendern.
 
 **Don't:**
 - Eigene Parsing- oder Rendering-Layer bauen, wenn Spectre.Console.Cli / Rendering API genügt.
 - Externe Libraries für CLI Styling / Parsing hinzufügen (z.B. System.CommandLine, Colorful.Console, Sharprompt, etc.).
+- Git/Docker/… Client-Libraries (LibGit2Sharp, Octokit für lokale Git-Infos, Docker.DotNet, etc.) statt einfacher CLI-Aufrufe nutzen – außer es gibt eine dokumentierte Notwendigkeit.
 - Rohes Schreiben auf `Console.*` statt über `AnsiConsole` (Ausnahme: sehr früher Bootstrap vor Spectre-Init – nach Möglichkeit vermeiden).
 - Manuelle Threading-Loops für Spinner/Progress – Spectre Progress/Status benutzen.
+
 
 ## Erweiterungen / Zukunft
 Falls Anforderungen auftreten, die Spectre.NET nicht abdeckt:
@@ -51,4 +55,4 @@ Wenn von obigen Regeln abgewichen wird: Kurz im README oder in `docs/ARCHITECTUR
 Diese App ist eine TUI. Benutze ausschließlich Spectre.Console (Spectre.NET). Baue keine Features nach, die es dort schon gibt. Keine Zusatz-UI-Libraries. Kein manueller ANSI-Output.
 
 ---
-Letzte Aktualisierung: 2025-11-06
+Letzte Aktualisierung: 2025-11-11
