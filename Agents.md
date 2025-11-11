@@ -54,5 +54,8 @@ Wenn von obigen Regeln abgewichen wird: Kurz im README oder in `docs/ARCHITECTUR
 ## Kurzfassung für neue Mitwirkende
 Diese App ist eine TUI. Benutze ausschließlich Spectre.Console (Spectre.NET). Baue keine Features nach, die es dort schon gibt. Keine Zusatz-UI-Libraries. Kein manueller ANSI-Output.
 
+## Build-Prüfung nach Änderungen
+Nach jeder inhaltlichen Änderung an Code oder Dokumentation ist zwingend ein `dotnet build` im Repository-Wurzelverzeichnis auszuführen, um Compile-Fehler frühzeitig zu erkennen. Tritt ein Fehler auf, muss er unmittelbar behoben werden, bevor weitere Änderungen vorgenommen oder gepusht werden.
+
 ---
 Letzte Aktualisierung: 2025-11-11
