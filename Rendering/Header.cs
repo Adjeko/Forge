@@ -67,16 +67,51 @@ internal sealed class Header : IRenderable
         return prefix + new string(' ', spacingLen) + versionDisplay;
     }
 
+    private readonly Color _startColor;
+    private readonly Color _endColor;
+
+    public Header(Color? start = null, Color? end = null)
+    {
+        _startColor = start ?? Color.Red;
+        _endColor = end ?? Color.White;
+    }
+
     private IRenderable BuildGrid()
     {
         int width = AnsiConsole.Profile.Width;
         const string LeftPattern = "////";
         const string FillerPattern = "////";
 
+        // Sichtbare Länge eines Markup-Strings (ignoriert Spectre-Markup Tags)
+        static int GetVisibleLength(string content)
+        {
+            int len = 0;
+            bool inTag = false;
+            for (int i = 0; i < content.Length; i++)
+            {
+                var c = content[i];
+                if (c == '[')
+                {
+                    // Start eines Tags
+                    inTag = true;
+                    continue;
+                }
+                if (inTag && c == ']')
+                {
+                    inTag = false;
+                    continue;
+                }
+                if (!inTag)
+                    len++;
+            }
+            return len;
+        }
+
+        // Erzeugt eine Zeile mit optionaler einfacher Farb-Markup Kennzeichnung
         string BuildLine(string content, string? color = null)
         {
             var main = color is null ? content : $"[{color}]{content}[/]";
-            int visibleLen = LeftPattern.Length + 1 + content.Length + 1;
+            int visibleLen = LeftPattern.Length + 1 + GetVisibleLength(content) + 1;
             int remaining = width - visibleLen;
             if (remaining <= 0)
                 return $"[red]{LeftPattern}[/] {main}";
@@ -93,12 +128,47 @@ internal sealed class Header : IRenderable
             return $"[red]{LeftPattern}[/] {main} [red]{filler}[/]";
         }
 
+        // Gradient-Funktion: Interpoliert von Rot (255,0,0) nach Weiß (255,255,255)
+        string ApplyGradient(string text, Color startColor, Color endColor)
+        {
+            // Farbstufen nur über nicht-leere Zeichen anwenden; Spaces bleiben unverändert
+            var chars = text.ToCharArray();
+            int gradientChars = chars.Count(c => c != ' ');
+            if (gradientChars <= 1)
+                return text; // Nichts zu graduieren
+
+            int processed = 0;
+            var sb = new System.Text.StringBuilder(text.Length * 20);
+            foreach (var ch in chars)
+            {
+                if (ch == ' ')
+                {
+                    sb.Append(ch);
+                    continue;
+                }
+                double t = processed / (double)(gradientChars - 1); // 0..1
+                // Lineare Interpolation zwischen Start- und Endfarbe
+                int r = (int)(startColor.R + ((endColor.R - startColor.R) * t));
+                int g = (int)(startColor.G + ((endColor.G - startColor.G) * t));
+                int b = (int)(startColor.B + ((endColor.B - startColor.B) * t));
+                sb.Append("[#");
+                sb.Append(r.ToString("X2"));
+                sb.Append(g.ToString("X2"));
+                sb.Append(b.ToString("X2"));
+                sb.Append(']');
+                sb.Append(ch);
+                sb.Append("[/]");
+                processed++;
+            }
+            return sb.ToString();
+        }
+
         var lines = new[]
         {
             BuildLine(GetVersionText(), "bold red"),
-            BuildLine(Top),
-            BuildLine(Middle),
-            BuildLine(Bottom),
+            BuildLine(ApplyGradient(Top, _startColor, _endColor)),
+            BuildLine(ApplyGradient(Middle, _startColor, _endColor)),
+            BuildLine(ApplyGradient(Bottom, _startColor, _endColor)),
             BuildLine("/////////////////////////////////////////", "red")
         };
 

@@ -12,7 +12,7 @@ internal static class MainLayout
     /// <summary>
     /// Baut ein neues Layout für die aktuelle Render-Periode.
     /// </summary>
-    public static Layout Build()
+    public static Layout Build(string? startColor = null, string? endColor = null)
     {
         var layout = new Layout("root")
             .SplitRows(
@@ -21,7 +21,40 @@ internal static class MainLayout
                 new Layout("footer").Size(2)
             );
 
-        layout["header"].Update(new Header());
+        // Parse Farbparameter falls vorhanden; erlaubt sowohl Hex (#RRGGBB) als auch Spectre Farbnamen.
+        Color Parse(string? value, Color fallback)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return fallback;
+            // Hex ohne # akzeptieren
+            var v = value.Trim();
+            if (v.StartsWith('#')) v = v[1..];
+            if (v.Length == 6 && int.TryParse(v, System.Globalization.NumberStyles.HexNumber, null, out var hex))
+            {
+                var r = (hex >> 16) & 0xFF;
+                var g = (hex >> 8) & 0xFF;
+                var b = hex & 0xFF;
+                return new Color((byte)r, (byte)g, (byte)b);
+            }
+            // Fallback: versuchen über bekannte Spectre Farbnamen
+            return v.ToLowerInvariant() switch
+            {
+                "red" => Color.Red,
+                "white" => Color.White,
+                "yellow" => Color.Yellow,
+                "blue" => Color.Blue,
+                "green" => Color.Green,
+                "cyan" => new Color(0,255,255),
+                "magenta" => new Color(255,0,255),
+                "grey" => Color.Grey,
+                _ => fallback
+            };
+        }
+
+        var start = Parse(startColor, Color.Red);
+        var end = Parse(endColor, Color.White);
+
+        layout["header"].Update(new Header(start, end));
         layout["content"].Update(BuildContent());
         layout["footer"].Update(new Footer());
 

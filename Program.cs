@@ -36,7 +36,8 @@ internal static class Program
 	private static void Render()
 	{
 		AnsiConsole.Clear();
-		var layout = MainLayout.Build();
+		// Beispiel: Farben können künftig konfigurierbar gemacht werden (CLI Argumente / Config).
+		var layout = MainLayout.Build(startColor: "#FF0000", endColor: "#FFFFFF");
 		AnsiConsole.Write(layout);
 	}
 }
