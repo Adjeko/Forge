@@ -24,7 +24,8 @@ internal static class Program
 				// Ctrl+G -> git status im Zielverzeichnis ausführen
 				if (key.Key == ConsoleKey.G && key.Modifiers.HasFlag(ConsoleModifiers.Control))
 				{
-					RunGitStatus(); // setzt _mainContent und rendert neu
+					_mainContent = _gitStatusCommand.Execute();
+					Render();
 					continue; // Nächste Iteration
 				}
 			}
@@ -42,6 +43,7 @@ internal static class Program
 	}
 
 	private static IRenderable? _mainContent;
+	private static Services.Git.IGitCommand _gitStatusCommand = new Services.Git.GitStatusCommand("C:/ADO/CS2");
 
 	private static void Render()
 	{
@@ -51,53 +53,7 @@ internal static class Program
 		AnsiConsole.Write(layout);
 	}
 
-	private static void RunGitStatus()
-	{
-		try
-		{
-			// Keine Vorab-Statusmeldung: direkt Prozess starten
-			var psi = new System.Diagnostics.ProcessStartInfo
-			{
-				FileName = "git",
-				Arguments = "status --short --branch",
-				WorkingDirectory = "C:/ADO/CS2",
-				RedirectStandardOutput = true,
-				RedirectStandardError = true,
-				UseShellExecute = false,
-				CreateNoWindow = true
-			};
-			using var proc = System.Diagnostics.Process.Start(psi)!;
-			string stdout = proc.StandardOutput.ReadToEnd();
-			string stderr = proc.StandardError.ReadToEnd();
-			proc.WaitForExit();
 
-			if (!string.IsNullOrWhiteSpace(stderr))
-			{
-				AnsiConsole.MarkupLine($"[yellow]Warn/Error:[/] {stderr.Replace("[", "[[").Replace("]", "]]")}");
-			}
 
-			if (string.IsNullOrWhiteSpace(stdout))
-			{
-				AnsiConsole.MarkupLine("[grey]Keine Ausgabe[/]");
-				return;
-			}
 
-			// Einfache Rohtext-Ausgabe ohne Tabelle
-			_mainContent = new Panel(new Markup(Escape(stdout)))
-			{
-				Border = BoxBorder.Rounded,
-				Header = new PanelHeader("git status (C:/ADO/CS2)")
-			};
-			Render();
-		}
-		catch (Exception ex)
-		{
-			AnsiConsole.MarkupLine($"[red]Fehler beim Ausführen von git status:[/] {Escape(ex.Message)}");
-		}
-	}
-
-	private static string Escape(string raw)
-	{
-		return raw.Replace("[", "[[").Replace("]", "]]");
-	}
 }
