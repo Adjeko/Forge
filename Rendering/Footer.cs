@@ -30,7 +30,8 @@ internal sealed class Footer : IRenderable
         // Hotkey-Legende (nur vorhandene, erweitert werden wenn neue Keys implementiert werden)
         var legendTable = new Table().NoBorder().AddColumn("Hotkeys");
         legendTable.HideHeaders();
-        legendTable.AddRow(new Markup("[grey]Esc[/] : Beenden"));
+		legendTable.AddRow(new Markup("[grey]Esc[/] : Beenden"));
+		legendTable.AddRow(new Markup("[grey]Strg+G[/] : git status (C:/ADO/CS2)"));
         // Weitere Einträge können hier hinzugefügt werden, sobald zusätzliche Tasten unterstützt werden.
         grid.AddRow(legendTable);
 

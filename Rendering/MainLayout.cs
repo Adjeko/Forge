@@ -12,7 +12,7 @@ internal static class MainLayout
     /// <summary>
     /// Baut ein neues Layout für die aktuelle Render-Periode.
     /// </summary>
-    public static Layout Build(string? startColor = null, string? endColor = null)
+    public static Layout Build(string? startColor = null, string? endColor = null, IRenderable? mainContent = null)
     {
         var layout = new Layout("root")
             .SplitRows(
@@ -26,7 +26,6 @@ internal static class MainLayout
         {
             if (string.IsNullOrWhiteSpace(value))
                 return fallback;
-            // Hex ohne # akzeptieren
             var v = value.Trim();
             if (v.StartsWith('#')) v = v[1..];
             if (v.Length == 6 && int.TryParse(v, System.Globalization.NumberStyles.HexNumber, null, out var hex))
@@ -36,7 +35,6 @@ internal static class MainLayout
                 var b = hex & 0xFF;
                 return new Color((byte)r, (byte)g, (byte)b);
             }
-            // Fallback: versuchen über bekannte Spectre Farbnamen
             return v.ToLowerInvariant() switch
             {
                 "red" => Color.Red,
@@ -55,21 +53,24 @@ internal static class MainLayout
         var end = Parse(endColor, Color.White);
 
         layout["header"].Update(new Header(start, end));
-        layout["content"].Update(BuildContent());
+        layout["content"].Update(BuildContent(mainContent));
         layout["footer"].Update(new Footer());
 
         return layout;
     }
 
-    private static IRenderable BuildContent()
+    private static IRenderable BuildContent(IRenderable? overrideContent)
     {
-        // Placeholder Content Panel – kann später durch dynamische Views ersetzt werden.
-        var panel = new Panel(new Markup("[green]Inhalt[/] – Platz für zukünftige Module"))
+        var content = overrideContent ?? new Markup("[green]Inhalt[/] – Platz für zukünftige Module");
+        // Wenn overrideContent bereits ein Panel ist, direkt zurückgeben um Doppelrahmen zu vermeiden
+        if (overrideContent is Panel p)
+            return p;
+
+        var panel = new Panel(content)
         {
             Border = BoxBorder.Rounded,
-            Padding = new Padding(1, 0, 1, 0)
+            Padding = new Padding(0, 0, 0, 0)
         };
-        panel.Header = new PanelHeader("Main");
         return panel;
     }
 
