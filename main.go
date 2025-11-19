@@ -35,6 +35,9 @@ func (m model) View() string {
 		return "Loading..."
 	}
 
+	// Render the header
+	header := RenderHeader(m.width)
+
 	// Define the style for the text
 	textStyle := lipgloss.NewStyle().
 		Bold(true).
@@ -43,16 +46,23 @@ func (m model) View() string {
 		Padding(1, 4)
 
 	// Render the text
-	text := textStyle.Render("SEW")
+	text := textStyle.Render("SEW Content")
 
-	// Center the text in the full screen
-	return lipgloss.Place(
+	// Center the text in the remaining height
+	contentHeight := m.height - lipgloss.Height(header)
+	if contentHeight < 0 {
+		contentHeight = 0
+	}
+
+	content := lipgloss.Place(
 		m.width,
-		m.height,
+		contentHeight,
 		lipgloss.Center,
 		lipgloss.Center,
 		text,
 	)
+
+	return lipgloss.JoinVertical(lipgloss.Left, header, content)
 }
 
 func main() {
