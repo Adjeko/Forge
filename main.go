@@ -5,14 +5,16 @@ import (
 	"os"
 
 	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type model struct {
-	width  int
-	height int
-	help   help.Model
+	width         int
+	height        int
+	help          help.Model
+	commandOutput string
 }
 
 func (m model) Init() tea.Cmd {
@@ -22,8 +24,18 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		if msg.String() == "ctrl+c" {
+		switch {
+		case key.Matches(msg, Keys.Quit):
 			return m, tea.Quit
+		case key.Matches(msg, Keys.GitStatus):
+			cmd := CreateGitStatusCommand()
+			return m, RunCommand(cmd)
+		}
+	case RunCommandMsg:
+		if msg.Err != nil {
+			m.commandOutput = fmt.Sprintf("Error: %v", msg.Err)
+		} else {
+			m.commandOutput = msg.Output
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -50,11 +62,12 @@ func (m model) View() string {
 		contentHeight = 0
 	}
 
-	// Create an empty content area that fills the remaining space
-	content := lipgloss.NewStyle().
+	// Render content
+	contentStyle := lipgloss.NewStyle().
 		Width(m.width).
-		Height(contentHeight).
-		Render("")
+		Height(contentHeight)
+
+	content := contentStyle.Render(m.commandOutput)
 
 	return lipgloss.JoinVertical(lipgloss.Left, header, content, footer)
 }

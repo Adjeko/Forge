@@ -8,7 +8,8 @@ import (
 
 // KeyMap defines the keybindings for the application
 type KeyMap struct {
-	Quit key.Binding
+	Quit      key.Binding
+	GitStatus key.Binding
 }
 
 // Keys holds the actual key bindings
@@ -17,16 +18,20 @@ var Keys = KeyMap{
 		key.WithKeys("ctrl+c"),
 		key.WithHelp("ctrl+c", "Quit"),
 	),
+	GitStatus: key.NewBinding(
+		key.WithKeys("s"),
+		key.WithHelp("s", "Git Status"),
+	),
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view
 func (k KeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Quit}
+	return []key.Binding{k.GitStatus, k.Quit}
 }
 
 // FullHelp returns keybindings for the expanded help view
 func (k KeyMap) FullHelp() [][]key.Binding {
-	return [][]key.Binding{{k.Quit}}
+	return [][]key.Binding{{k.GitStatus, k.Quit}}
 }
 
 var (
