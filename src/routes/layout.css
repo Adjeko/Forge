@@ -1,3 +1,14 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+@theme {
+	--font-sans: 'Inter', sans-serif;
+}
+
+:root {
+	font-family: var(--font-sans);
+	background-color: #0d0d0d;
+	color: #ffffff;
+	overflow: hidden;
+}
