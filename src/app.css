@@ -2,6 +2,7 @@
 
 @theme {
   --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Orbitron', system-ui, sans-serif;
 
   --color-brand-primary: #FF3D00;
   --color-brand-secondary: #FF9100;
