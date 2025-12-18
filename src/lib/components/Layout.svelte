@@ -1,5 +1,6 @@
 <script lang="ts">
     import { page } from "$app/stores";
+    import { commands } from "$lib/stores/commands";
 
     let { children } = $props();
 
@@ -64,6 +65,34 @@
                     <span class="font-medium">{item.name}</span>
                 </a>
             {/each}
+
+            {#if $commands.length > 0}
+                <div class="pt-4 mt-2 border-t border-border/50">
+                    <p
+                        class="px-4 text-xs font-semibold text-text-muted/50 uppercase tracking-wider mb-2"
+                    >
+                        Active Tasks
+                    </p>
+                    {#each $commands as cmd}
+                        <a
+                            href="/commands/{cmd.id}"
+                            class="flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-200 group text-sm
+                            {$page.url.pathname === `/commands/${cmd.id}`
+                                ? 'bg-brand-secondary/10 text-brand-secondary'
+                                : 'text-text-muted hover:bg-bg-card-hover hover:text-white'}"
+                        >
+                            <span class="material-symbols-rounded text-lg">
+                                {cmd.status === "running"
+                                    ? "sync"
+                                    : cmd.status === "completed"
+                                      ? "check_circle"
+                                      : "error"}
+                            </span>
+                            <span class="font-medium truncate">{cmd.name}</span>
+                        </a>
+                    {/each}
+                </div>
+            {/if}
         </nav>
 
         <div class="p-4 border-t border-border">
