@@ -2,8 +2,9 @@
     import { page } from "$app/stores";
     import { commands } from "$lib/stores/commands";
     import { onMount } from "svelte";
+    import { goto } from "$app/navigation";
 
-    let terminalEnd: HTMLDivElement;
+    let terminalEnd = $state<HTMLDivElement>();
 
     // Find the current command based on the ID in the URL
     $effect(() => {
@@ -12,12 +13,11 @@
         }
     });
 
-    const commandId = $page.params.id;
     // We use a derived value or just reactively find it in the template
 </script>
 
-{#if $commands.find((c) => c.id === commandId)}
-    {@const cmd = $commands.find((c) => c.id === commandId)}
+{#if $commands.find((c) => c.id === $page.params.id)}
+    {@const cmd = $commands.find((c) => c.id === $page.params.id)}
     <div class="flex flex-col h-full max-h-[calc(100vh-8rem)]">
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-4">
@@ -61,6 +61,18 @@
                         >
                     </div>
                 {/if}
+                <button
+                    onclick={() => {
+                        if (cmd?.id) {
+                            commands.remove(cmd.id);
+                            goto("/");
+                        }
+                    }}
+                    class="p-2 hover:bg-white/10 rounded-lg text-text-muted hover:text-red-500 transition-colors ml-2"
+                    title="Remove Task"
+                >
+                    <span class="material-symbols-rounded">delete</span>
+                </button>
             </div>
         </div>
 

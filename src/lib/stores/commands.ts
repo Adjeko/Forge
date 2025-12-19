@@ -84,6 +84,9 @@ function createCommandsStore() {
                 );
             }
         },
+        remove: (id: string) => {
+            update(sessions => sessions.filter(s => s.id !== id));
+        },
         clear: () => set([])
     };
 }
